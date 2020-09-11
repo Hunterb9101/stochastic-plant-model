@@ -7,7 +7,7 @@ function plantGrid = applyMortalityRates(oldPlantGrid,mortalityRate)
     for idx = 1:length(idxs)
         for k = 1:oldPlantGrid(idxs)
             if rand(1,1) > mortalityRate
-                plantGrid(idx) = plantGrid(idx) + 1;
+                plantGrid(idxs) = plantGrid(idxs) + 1;
             end
         end 
     end

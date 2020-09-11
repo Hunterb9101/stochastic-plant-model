@@ -36,8 +36,8 @@ function pop_model
         for j = 1:years
             % Apply Mortality Rates
             % NOTE: This step is computationally expensive
-            %plantN = apply_mortality_rates(plantN,mortalityN);
-            %plantS = apply_mortality_rates(plantS,mortalityS);
+            plantN = apply_mortality_rates(plantN,mortalityN);
+            plantS = apply_mortality_rates(plantS,mortalityS);
 
             % Mid-year reproduction step
             plantS = reproduce(plantS,1);
