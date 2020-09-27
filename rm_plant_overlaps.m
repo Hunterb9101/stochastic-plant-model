@@ -1,3 +1,4 @@
+% Removes overlaps between two grids
 function [plantN,plantS] = rm_plant_overlaps(plantN, plantS)
     [szX,szY] = size(plantN); %Get grid size
     idxs = find(plantN > 0);
