@@ -28,7 +28,7 @@ secondReproductionS = true;
 disp("With a 5% Mortality Rate:")
 [mByYrN, mByYrS] = model(years, numModels, sizeGrid, rii, numPlantN, ...
                          mortalityN, numPlantS, mortalityS, ...
-                         secondReproductionS);
+                         secondReproductionS, 1, 1);
 mByYrN
 mByYrS
 
@@ -37,6 +37,6 @@ mortalityN = 0;
 mortalityS = 0;
 [mByYrN, mByYrS] = model(years, numModels, sizeGrid, rii, numPlantN, ...
                          mortalityN, numPlantS, mortalityS, ...
-                         secondReproductionS);
+                         secondReproductionS, 1, 1);
 mByYrN
 mByYrS

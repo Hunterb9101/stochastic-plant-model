@@ -1,6 +1,7 @@
 function [mByYrN, mByYrS] = model(years, numModels, sizeGrid, rii, ... 
                                       numPlantN, mortalityN, numPlantS, ...
-                                      mortalityS, secondReproductionS)
+                                      mortalityS, secondReproductionS, ...
+                                      reprRadN, reprRadS)
     % Analysis Variablaes
     pctPlantN = zeros(years, numModels); % Percent of native plants in the matrix
     pctPlantS = zeros(years, numModels); % Percent of invasive plants in the matrix
@@ -24,12 +25,12 @@ function [mByYrN, mByYrS] = model(years, numModels, sizeGrid, rii, ...
 
             % Mid-year reproduction step
             if secondReproductionS
-                plantS = reproduce(plantS,1);
+                plantS = reproduce(plantS,reprRadS);
             end
 
             % End-year reproduction
-            plantN = reproduce(plantN,1);
-            plantS = reproduce(plantS,1);
+            plantN = reproduce(plantN,reprRadN);
+            plantS = reproduce(plantS,reprRadS);
             [plantN,plantS] = run_year_rii(plantN,plantS, rii);
 
             numPlants = [sum(plantN(:)), sum(plantS(:))];
