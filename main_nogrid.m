@@ -1,21 +1,21 @@
 clc; clf;
 
+% Model Parameters
 model_dims = [100, 100];  % 100 meters by 100 meters
-
 riiTable = [
     0.000, 0.250;
     0.250, 0.000
     ];
 
-test = Plant("TestPlant", "TestFun", .75, "g", 1);
-test2 = Plant("TestPlant2", "TestFun2", 1, "r", 1);
-test.riiTable.data = riiTable;
+% Plot settings
+xlim([0, model_dims(1)])
+ylim([0, model_dims(2)])
+daspect([1 1 1])
 
-a = [PlantObj(0, 0, test), PlantObj(0, 1, test2), PlantObj(1, -1, test2)];
-for i = a
-    i.plot();
+invasive = Plant("InvasivePlant", "SPREAD-FUNCTION", .75, "g", 1);
+native = Plant("NativePlant", "SPREAD-FUNCTION", 1, "r", 1);
+invasive.riiTable.data = riiTable; 
+
+for i = b
+    %i.plot();
 end
-
-xlim([-4, 4])
-ylim([-4, 4])
-axis equal

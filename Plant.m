@@ -3,10 +3,10 @@ classdef Plant
     
     properties
         name % String: Name of the species
-        spreadFun  % Function: Spread function for reproduction step
-        matureRad  % Float: Mature radius of a plant
-        matureAge  % Int: Age that a plant survives to
-        riiTableIdx % Int: Index of plant in the RII table
+        spread_fun  % Function: Spread function for reproduction step
+        mature_rad  % Float: Mature radius of a plant
+        mature_age  % Int: Age that a plant survives to
+        rii_table_idx % Int: Index of plant in the RII table
         col % Color: Color of the plant
     end
     
@@ -15,7 +15,7 @@ classdef Plant
     end
     
     methods
-        function p = Plant(name, spreadFun, matureRad, col, riiTableIdx)
+        function p = Plant(name, spread_fun, mature_rad, col, rii_table_idx)
             %PLANT Construct an instance of this class
             %   name: String. Name of the species
             %   spreadFun: Function. Spread function for reproduction step
@@ -23,9 +23,10 @@ classdef Plant
             %   col: Color. The color of the plant when plotted
             %   riiTableIdx: Int. Index of the plant in the RII table
             p.name = name;
-            p.spreadFun = spreadFun;
-            p.matureRad = matureRad;
-            p.riiTableIdx = riiTableIdx;
+            p.spread_fun = spread_fun;
+            p.mature_rad = mature_rad;
+            p.mature_age = matureAge;
+            p.rii_table_idx = rii_table_idx;
             p.col = col;
         end
     end

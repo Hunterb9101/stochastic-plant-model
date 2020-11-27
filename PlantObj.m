@@ -7,14 +7,14 @@ classdef PlantObj < Obj
     end
     
     methods
-        function obj = PlantObj(x, y, speciesPlant)
+        function obj = PlantObj(x, y, species_plant)
             %PLANT_OBJ Construct an instance of this class
             %   x: Float. X location in the model
             %   y: Float. Y location in the model
             %   speciesPlant: Plant. The plant type in the model
-            obj@Obj(x, y, speciesPlant.matureRad);
-            obj.plant = speciesPlant;
-            obj.col = speciesPlant.col;
+            obj@Obj(x, y, species_plant.mature_rad);
+            obj.plant = species_plant;
+            obj.col = species_plant.col;
         end
         
         function out = plot(obj)
@@ -23,8 +23,8 @@ classdef PlantObj < Obj
             % Returns: Line. A circle plotted with center Obj.x, Obj.y, and
             %     radius Obj.r.
             hold on
-            out = filled_circle(obj.x, obj.y, .1, obj.col, 1);
-            out = filled_circle(obj.x, obj.y, obj.r, obj.col, .4);
+            filledCircle(obj.x, obj.y, .1, obj.col, 1);
+            out = filledCircle(obj.x, obj.y, obj.r, obj.col, .4);
             hold off
         end
     end

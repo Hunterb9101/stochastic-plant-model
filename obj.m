@@ -56,7 +56,7 @@ classdef Obj
             % Return: Line. A circle plotted with center Obj.x, Obj.y, and
             %     radius Obj.r.
             hold on
-            out = filled_circle(obj.x, obj.y, obj.r, obj.col, .4);
+            out = filledCircle(obj.x, obj.y, obj.r, obj.col, .4);
             hold off
         end
     end
