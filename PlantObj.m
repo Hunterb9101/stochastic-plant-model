@@ -3,7 +3,7 @@ classdef PlantObj < Obj
     
     properties
         plant % Plant: The plant speices 
-        age % Int: An integer for the age of a plant
+        age = 0 % Int: An integer for the age of a plant
     end
     
     methods
@@ -26,6 +26,14 @@ classdef PlantObj < Obj
             filledCircle(obj.x, obj.y, .1, obj.col, 1);
             out = filledCircle(obj.x, obj.y, obj.r, obj.col, .4);
             hold off
+        end
+        
+        function obj = nextYear(obj)
+            obj.age = obj.age + 1;
+        end
+        
+        function out = reproduce(obj)
+            out = obj.plant.spread_fun(obj.x, obj.y, obj.plant);
         end
     end
 end

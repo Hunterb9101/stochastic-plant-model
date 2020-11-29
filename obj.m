@@ -1,4 +1,4 @@
-classdef Obj
+classdef Obj < handle
     %OBJECT A generic object to plot in the model
     
     properties

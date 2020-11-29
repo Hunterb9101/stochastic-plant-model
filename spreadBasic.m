@@ -8,7 +8,6 @@ r = random(distr, seeds, 1);
 theta = (2*pi).*rand(seeds, 1);
 
 coords = transpose([r.*sin(theta), r.*cos(theta)]);
-size(coords)
 plantObjs = [];
 
 for c = coords
