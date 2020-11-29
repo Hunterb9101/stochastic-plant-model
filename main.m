@@ -16,7 +16,7 @@ numPlantS = 5; % Number of Invasive Plants
 mortalityS = .05; % Mortality Rate for Invasive Plants
 secondReproductionS = true;
 
-[mByYrN, mByYrS] = model(years, numModels, sizeGrid, rii, numPlantN, ...
+[mByYrN, mByYrS] = model_old(years, numModels, sizeGrid, rii, numPlantN, ...
                          mortalityN, numPlantS, mortalityS, secondReproductionS);
 mByYrN
 mByYrS

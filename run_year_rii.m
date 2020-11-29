@@ -7,4 +7,3 @@ function [plantN,plantS] = run_year_rii(plantN, plantS, rii)
     prob = .5 * rii + .5;
     [plantN, plantS] = run_year_probability(plantN, plantS, prob);
 end
-
