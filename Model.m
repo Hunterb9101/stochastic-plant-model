@@ -12,6 +12,7 @@ classdef Model < handle
             ];
         objects = []
         ts_now
+        plot_output = 1
     end
     
     methods
@@ -46,7 +47,7 @@ classdef Model < handle
             end
         end
         
-        function run(obj)
+        function out = run(obj)
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
             for year = 1:obj.years
@@ -76,27 +77,67 @@ classdef Model < handle
                 no_borders = obj.objects(logical(log_no_borders));
 
                 resolved_bounds = [];
+                dead_plants = [];
                 for i = 1:size(borders, 1)
+                    %disp("Comparing " + borders(i, 1).toString() + " and " + borders(i, 2).toString());
+                    
+                    if (ismember(borders(i, 1), dead_plants) && ismember(borders(i, 2), dead_plants))
+                        %disp("    Attempting to compete with dead plant. Continuing...")
+                        continue
+                    elseif (ismember(borders(i, 1), dead_plants))
+                        %disp("    Attempting to compete with dead plant. Continuing...")
+                        if ~ismember(borders(i, 2), resolved_bounds)
+                            resolved_bounds = [resolved_bounds, borders(i, 2)];
+                        end
+                        continue
+                    elseif (ismember(borders(i, 2), dead_plants))
+                        %disp("    Attempting to compete with 2 dead plants. Continuing...")
+                        if ~ismember(borders(i, 1), resolved_bounds)
+                            resolved_bounds = [resolved_bounds, borders(i, 1)];
+                        end
+                        continue
+                    end
+                    
                     if (size(resolved_bounds, 2) ~= 0)
+                        %disp("Before resolution: " + size(resolved_bounds, 2))
+                        if (ismember(borders(i, 1), resolved_bounds))
+                            %disp("    Already resolved: " + borders(i, 1).toString())
+                        end
+                        if (ismember(borders(i, 2), resolved_bounds))
+                            %disp("    Already resolved: " + borders(i, 2).toString())
+                        end
+                        
                         resolved_bounds(resolved_bounds == borders(i, 1)) = [];
                         resolved_bounds(resolved_bounds == borders(i, 2)) = [];
+                        %disp("After resolution: " + size(resolved_bounds, 2))
                     end
                     winner = competeRIIBasic(borders(i, 1), borders(i, 2));
+                    if (winner == borders(i, 1))
+                        loser = borders(i, 2);
+                    else
+                        loser = borders(i, 1);
+                    end
+                    dead_plants = [dead_plants, loser];
                     resolved_bounds = [resolved_bounds, winner];
+                    % disp("    Winner: " + winner.toString());
                 end
-                
-                borders_plot = reshape(borders, [1, size(borders, 1) * size(borders, 2)]);
-                obj.plotAndSave(no_borders, year, "no-borders")
-                obj.plotAndSave(borders_plot, year, "borders")
-                obj.plotAndSave(resolved_bounds, year, "resolved")
-                obj.plotAndSave(obj.objects, year, "all")
+                disp("Total: " + size(obj.objects,2) + ", Resolved: " + size(resolved_bounds,2) + ", Dead: " + size(dead_plants,2) + ", No Bordering: " + size(no_borders,2));
+                assert(size(obj.objects,2) == size(resolved_bounds,2) + size(dead_plants,2) + size(no_borders,2));
                 
                 obj.objects = [resolved_bounds, no_borders];
-                obj.plotAndSave(obj.objects, year, "resolved-all")
                 
+                if (obj.plot_output)
+                    borders_plot = reshape(borders, [1, size(borders, 1) * size(borders, 2)]);
+                    obj.plotAndSave(no_borders, year, "no-borders")
+                    obj.plotAndSave(borders_plot, year, "borders")
+                    obj.plotAndSave(resolved_bounds, year, "resolved")
+                    obj.plotAndSave(obj.objects, year, "all")
+                    obj.plotAndSave(obj.objects, year, "resolved-all")
+                end
                 % Update all plants to next year
                 arrayfun(@(x) x.nextYear(), obj.objects); 
             end
+            out = obj.objects;
         end
 
         function plotAndSave(obj, objects, year, timestamped_filename)

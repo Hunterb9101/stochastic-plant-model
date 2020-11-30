@@ -59,6 +59,11 @@ classdef Obj < handle
             out = filledCircle(obj.x, obj.y, obj.r, obj.col, .4);
             hold off
         end
+        
+        function out = toString(obj)
+            fmt = "x=%0.1f, y=%0.1f, r=%0.1f";
+            out = sprintf(fmt, obj.x, obj.y, obj.r);
+        end
     end
 end
 
