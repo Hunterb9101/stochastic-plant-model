@@ -43,7 +43,7 @@ classdef Obj < handle
         end
         
         function frac = fracBordering(obj, obj2)
-            % Get the fraction of overlap between two objects
+            % FRACBORDERING: Get the fraction of overlap between two objects
             %     obj and obj2: Obj.
             % Returns: Float (between 0 and 1). The fraction of overlap 
             %     between two objects, in reference to obj.
@@ -51,9 +51,9 @@ classdef Obj < handle
         end
         
         function out = plot(obj)
-            % Plot the object in the model
+            % PLOT: Plot the object in the model
             %     obj: Obj.
-            % Return: Line. A circle plotted with center Obj.x, Obj.y, and
+            % Returns: Line. A circle plotted with center Obj.x, Obj.y, and
             %     radius Obj.r.
             hold on
             out = filledCircle(obj.x, obj.y, obj.r, obj.col, .4);
@@ -61,6 +61,8 @@ classdef Obj < handle
         end
         
         function out = toString(obj)
+            % TOSTRING: For debugging purposes. A string representing the
+            % Obj object.
             fmt = "x=%0.1f, y=%0.1f, r=%0.1f";
             out = sprintf(fmt, obj.x, obj.y, obj.r);
         end

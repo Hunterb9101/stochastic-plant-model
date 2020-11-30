@@ -18,7 +18,7 @@ classdef PlantObj < Obj
         end
         
         function out = plot(obj)
-            % Plot the object in the model (Overloads Obj .plot() method)
+            % PLOT: Plot the object in the model (Overloads Obj .plot() method)
             %     obj: Obj.
             % Returns: Line. A circle plotted with center Obj.x, Obj.y, and
             %     radius Obj.r.
@@ -28,11 +28,15 @@ classdef PlantObj < Obj
             hold off
         end
         
-        function obj = nextYear(obj)
+        function nextYear(obj)
+            % NEXTYEAR: Advances the plant object by one year.
             obj.age = obj.age + 1;
         end
         
         function out = reproduce(obj)
+            % REPRODUCE: Reproduces given the reproduction function of the
+            % species of the plant.
+            % Returns: A list of plantObjs. (seedlings)
             out = obj.plant.spread_fun(obj.x, obj.y, obj.plant);
         end
     end

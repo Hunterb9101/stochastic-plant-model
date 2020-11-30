@@ -1,24 +1,22 @@
 classdef Model < handle
-    %MODEL Summary of this class goes here
-    %   Detailed explanation goes here
+    %MODEL Stochastic Plant Model (Non-grid).
     
     properties
-        dims = [100, 100]
-        years = 1;
+        dims = [100, 100] % Model dimensions (In meters) 
+        years = 1; % Number of years to run the model
         riiTable = [
             +0.000, -0.250, -0.500;
             +0.250, +0.000, -0.750; 
             +0.500, +0.750, +0.000
             ];
-        objects = []
-        ts_now
-        plot_output = 1
+        objects = [] % The model's objects
+        ts_now % A timestamp for plotting output
+        plot_output = 1 % Set to 1 to get plot output
     end
     
     methods
         function obj = Model(dims, years, riiTable)
             %MODEL Construct an instance of this class
-            %   Detailed explanation goes here
             obj.dims = dims;
             obj.years = years;
             obj.riiTable = riiTable;
@@ -26,7 +24,7 @@ classdef Model < handle
         end
         
         function init(obj)
-            % Initializes objects/plants for model
+            %INIT Initializes objects/plants for model
             spread = @(x,y,species) spreadBasic(x, y, species, 2, 50);
             plant_list = [
                 Plant("InvasivePlant", spread, .75, "r", 1), ...
@@ -48,8 +46,8 @@ classdef Model < handle
         end
         
         function out = run(obj)
-            %METHOD1 Summary of this method goes here
-            %   Detailed explanation goes here
+            %RUN runs the model for the number of iterations
+            %   Returns: List of objects in the final iteration of model
             for year = 1:obj.years
                 disp("Year: " + year);
                 idx = arrayfun(@(x)x.age < x.plant.mature_age, obj.objects);
@@ -79,59 +77,57 @@ classdef Model < handle
                 resolved_bounds = [];
                 dead_plants = [];
                 for i = 1:size(borders, 1)
-                    %disp("Comparing " + borders(i, 1).toString() + " and " + borders(i, 2).toString());
-                    
+                    % If a plant is dead, don't check it, and add the other
+                    % plant to the resolved list if it isn't already?
                     if (ismember(borders(i, 1), dead_plants) && ismember(borders(i, 2), dead_plants))
-                        %disp("    Attempting to compete with dead plant. Continuing...")
                         continue
                     elseif (ismember(borders(i, 1), dead_plants))
-                        %disp("    Attempting to compete with dead plant. Continuing...")
                         if ~ismember(borders(i, 2), resolved_bounds)
                             resolved_bounds = [resolved_bounds, borders(i, 2)];
                         end
                         continue
                     elseif (ismember(borders(i, 2), dead_plants))
-                        %disp("    Attempting to compete with 2 dead plants. Continuing...")
                         if ~ismember(borders(i, 1), resolved_bounds)
                             resolved_bounds = [resolved_bounds, borders(i, 1)];
                         end
                         continue
                     end
                     
+                    % If a plant has multiple bordering plants, remove it
+                    % from the resolved list, and have it compete with the
+                    % next plant.
                     if (size(resolved_bounds, 2) ~= 0)
-                        %disp("Before resolution: " + size(resolved_bounds, 2))
-                        if (ismember(borders(i, 1), resolved_bounds))
-                            %disp("    Already resolved: " + borders(i, 1).toString())
-                        end
-                        if (ismember(borders(i, 2), resolved_bounds))
-                            %disp("    Already resolved: " + borders(i, 2).toString())
-                        end
-                        
                         resolved_bounds(resolved_bounds == borders(i, 1)) = [];
                         resolved_bounds(resolved_bounds == borders(i, 2)) = [];
-                        %disp("After resolution: " + size(resolved_bounds, 2))
                     end
+                    
                     winner = competeRIIBasic(borders(i, 1), borders(i, 2));
+                    
+                    % Keep track of plants that lost (Useful for asserting
+                    % that the model is working correctly)
                     if (winner == borders(i, 1))
                         loser = borders(i, 2);
                     else
                         loser = borders(i, 1);
                     end
+                    
+                    % Update lists
                     dead_plants = [dead_plants, loser];
                     resolved_bounds = [resolved_bounds, winner];
-                    % disp("    Winner: " + winner.toString());
                 end
                 disp("Total: " + size(obj.objects,2) + ", Resolved: " + size(resolved_bounds,2) + ", Dead: " + size(dead_plants,2) + ", No Bordering: " + size(no_borders,2));
                 assert(size(obj.objects,2) == size(resolved_bounds,2) + size(dead_plants,2) + size(no_borders,2));
                 
+                % List of new objects
                 obj.objects = [resolved_bounds, no_borders];
                 
+                % Plot visual output
                 if (obj.plot_output)
-                    borders_plot = reshape(borders, [1, size(borders, 1) * size(borders, 2)]);
-                    obj.plotAndSave(no_borders, year, "no-borders")
-                    obj.plotAndSave(borders_plot, year, "borders")
-                    obj.plotAndSave(resolved_bounds, year, "resolved")
-                    obj.plotAndSave(obj.objects, year, "all")
+                    % borders_plot = reshape(borders, [1, size(borders, 1) * size(borders, 2)]);
+                    % obj.plotAndSave(no_borders, year, "no-borders")
+                    % obj.plotAndSave(borders_plot, year, "borders")
+                    % obj.plotAndSave(resolved_bounds, year, "resolved")
+                    % obj.plotAndSave(obj.objects, year, "all")
                     obj.plotAndSave(obj.objects, year, "resolved-all")
                 end
                 % Update all plants to next year
@@ -141,7 +137,7 @@ classdef Model < handle
         end
 
         function plotAndSave(obj, objects, year, timestamped_filename)
-            % Plots and saves objects
+            %PLOTANDSAVE Plots and saves objects.
             clf;
             xlim([0, obj.dims(1)]);
             ylim([0, obj.dims(2)]);

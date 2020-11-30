@@ -1,4 +1,7 @@
 function c = filledCircle(x,y,r,col,a)
+    % FILLEDCIRCLE: Plots a filled circle at (x,y), with radius r, color
+    % `col`, and alpha (transparency) a.
+    % Returns: Line, Filled circle plotted at given parameters. 
     hold on
     th = 0:pi/50:2*pi;
     x_circle = r * cos(th) + x;

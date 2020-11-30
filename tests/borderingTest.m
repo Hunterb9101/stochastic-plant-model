@@ -1,7 +1,8 @@
+% BorderTest: Test that after one year, there are 0 bordering plants.
 addpath('./..');
-num_tests = 1000;
-model_dims = [100, 100];  % 100 meters by 100 meters
-years = 1; % Number of years to run the model
+num_tests = 1000; % Run a number of random tests.
+model_dims = [100, 100];  % 100 meters by 100 meters.
+years = 1; % Number of years to run the model.
 riiTable = [
     +0.000, -0.250, -0.500;
     +0.250, +0.000, -0.750; 
