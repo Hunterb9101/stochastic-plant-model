@@ -56,7 +56,7 @@ classdef Model < handle
                 % Reproduce
                 new_plants = [];
                 for i = obj.objects
-                    % new_plants = [new_plants, i.reproduce()];
+                    new_plants = [new_plants, i.reproduce()];
                 end
                 disp("New Plants: " + size(new_plants, 2));
                 obj.objects = [obj.objects, new_plants];
