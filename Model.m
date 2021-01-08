@@ -4,11 +4,13 @@ classdef Model < handle
     properties
         dims = [100, 100] % Model dimensions (In meters) 
         years = 1; % Number of years to run the model
-        riiTable = [
+        rii_table = [
             +0.000, -0.250, -0.500;
             +0.250, +0.000, -0.750; 
             +0.500, +0.750, +0.000
             ];
+        plant_list = [] % A list of the different species in the model
+        plant_num = [] % The number of each plant to add (in same order as plant_list)
         objects = [] % The model's objects
         ts_now % A timestamp for plotting output
         plot_output = 1 % Set to 1 to get plot output
@@ -16,32 +18,27 @@ classdef Model < handle
     end
     
     methods
-        function obj = Model(dims, years, riiTable)
+        function obj = Model(dims, years, rii_table, plant_list, plant_num)
             %MODEL Construct an instance of this class
             obj.dims = dims;
             obj.years = years;
-            obj.riiTable = riiTable;
+            obj.rii_table = rii_table;
+            obj.plant_list = plant_list;
+            obj.plant_num = plant_num;
             obj.ts_now = now;
         end
         
         function init(obj)
             %INIT Initializes objects/plants for model
-            spread = @(x,y,species) spreadBasic(x, y, species, 2, 50);
-            plant_list = [
-                Plant("InvasivePlant", spread, .75, "r", 1), ...
-                Plant("NativePlant", spread, 1, "b", 2), ...
-                Plant("NativePlant2", spread, 3, "g", 3)
-            ];
-            plant_list(1).riiTable.data = obj.riiTable; 
-            init_plant_num = [10, 50, 25]; % Initial number of plants to spawn
+            obj.plant_list(1).riiTable.data = obj.rii_table; 
 
             % Initialize plants
-            for plant_idx = 1:size(plant_list, 2)
-                r = rand(2, init_plant_num(plant_idx));
+            for plant_idx = 1:size(obj.plant_list, 2)
+                r = rand(2, obj.plant_num(plant_idx));
                 r(1,:) = obj.dims(1) * r(1,:);
                 r(2,:) = obj.dims(2) * r(2,:);
                 for coord = r
-                    obj.objects = [obj.objects, PlantObj(coord(1), coord(2), plant_list(plant_idx))];
+                    obj.objects = [obj.objects, PlantObj(coord(1), coord(2), obj.plant_list(plant_idx))];
                 end
             end
         end
@@ -59,7 +56,7 @@ classdef Model < handle
                 for i = obj.objects
                     temp = i.reproduce();
                     for t = temp
-                        if (t.x > 0 & t.x < obj.dims(1) & t.y > 0 & ...
+                        if (t.x > 0 && t.x < obj.dims(1) && t.y > 0 && ...
                             t.y < obj.dims(2))
                             new_plants = [new_plants, t];
                         end
