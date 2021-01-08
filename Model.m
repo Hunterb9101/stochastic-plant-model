@@ -12,6 +12,7 @@ classdef Model < handle
         objects = [] % The model's objects
         ts_now % A timestamp for plotting output
         plot_output = 1 % Set to 1 to get plot output
+        border_margin = 10
     end
     
     methods
@@ -56,7 +57,13 @@ classdef Model < handle
                 % Reproduce
                 new_plants = [];
                 for i = obj.objects
-                    new_plants = [new_plants, i.reproduce()];
+                    temp = i.reproduce();
+                    for t = temp
+                        if (t.x > 0 & t.x < obj.dims(1) & t.y > 0 & ...
+                            t.y < obj.dims(2))
+                            new_plants = [new_plants, t];
+                        end
+                    end
                 end
                 disp("New Plants: " + size(new_plants, 2));
                 obj.objects = [obj.objects, new_plants];
@@ -139,8 +146,12 @@ classdef Model < handle
         function plotAndSave(obj, objects, year, timestamped_filename)
             %PLOTANDSAVE Plots and saves objects.
             clf;
-            xlim([0, obj.dims(1)]);
-            ylim([0, obj.dims(2)]);
+            xlim([0 - obj.border_margin, obj.dims(1) + obj.border_margin]);
+            ylim([0 - obj.border_margin, obj.dims(2) + obj.border_margin]);
+            yline(0, '--');
+            xline(0, '--');
+            yline(obj.dims(2), '--');
+            xline(obj.dims(1), '--');
             daspect([1 1 1]);
             for i = objects
                 i.plot();
