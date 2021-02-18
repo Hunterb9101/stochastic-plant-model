@@ -4,11 +4,7 @@ classdef Model < handle
     properties
         dims = [100, 100] % Model dimensions (In meters) 
         years = 1; % Number of years to run the model
-        rii_table = [
-            +0.000, -0.250, -0.500;
-            +0.250, +0.000, -0.750; 
-            +0.500, +0.750, +0.000
-            ];
+        rii_table = []
         plant_list = [] % A list of the different species in the model
         plant_num = [] % The number of each plant to add (in same order as plant_list)
         objects = [] % The model's objects
@@ -66,6 +62,7 @@ classdef Model < handle
                 obj.objects = [obj.objects, new_plants];
 
                 % Remove Overlaps
+                disp("Getting bordering plants.");
                 log_no_borders = ones(size(obj.objects));
                 borders = [];
                 for i = 1:size(obj.objects, 2)
@@ -80,6 +77,7 @@ classdef Model < handle
 
                 resolved_bounds = [];
                 dead_plants = [];
+                disp("Calculating competition");
                 for i = 1:size(borders, 1)
                     % If a plant is dead, don't check it, and add the other
                     % plant to the resolved list if it isn't already?

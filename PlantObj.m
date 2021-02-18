@@ -3,7 +3,7 @@ classdef PlantObj < Obj
     
     properties
         plant % Plant: The plant speices 
-        age = 0 % Int: An integer for the age of a plant
+        age = -1 % Int: An integer for the age of a plant
     end
     
     methods
