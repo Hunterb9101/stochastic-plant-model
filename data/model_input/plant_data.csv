@@ -1,0 +1,10 @@
+﻿plant_id,name,spread_lo,spread_hi,spread_method,mature_age,width,rep_cyc,seeds_lo,seeds_hi
+LP,Lupinus sericeus,0,35,Beta,8,50,1,5,75
+HV,Heterotheca villosa,100,100,Beta,8,25,1,600,1000
+BH,Bochera holboellii,0,20,Beta,2,15,1,384,384
+PS,Pseudoegneria spicata,50,1000,Uniform,8,50,1,20,200
+BT,Bromus tectorum,50,1000,Uniform,1,25,2,25,400
+CM,Papaver rhoeas,0,25,Beta,1,40,1,111,80000
+LS,Lactuca serriola,100,5000000,Uniform,2,30,1,700,46000
+VG,Daucus carrota,50,600,Uniform,2,40,1,1000,40000
+SL,Sisymbrium loeselii,30,150,Uniform,1,70,2,100,10000
