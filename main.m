@@ -37,7 +37,7 @@ plant_list = [
         cmp.width(1)/100, cmp.mature_age(1), "b", 2), ...
 ];
   
-plant_num = [100, 200];
+plant_num = [1, 1];
 
 m = Model(model_dims, years, rii_table, plant_list, plant_num);
 m.init();

@@ -58,25 +58,34 @@ classdef Model < handle
                         end
                     end
                 end
-                disp("New Plants: " + size(new_plants, 2));
+                disp("New Plants: " + size(new_plants, 2) + ", Existing Plants: " + length(obj.objects));
                 obj.objects = [obj.objects, new_plants];
 
-                % Remove Overlaps
-                disp("Getting bordering plants.");
-                log_no_borders = ones(size(obj.objects));
-                borders = [];
-                for i = 1:size(obj.objects, 2)
-                    for j = 1:i-1
-                        if(obj.objects(i).isBordering(obj.objects(j)))
-                            borders = [borders; [obj.objects(i), obj.objects(j)]];
-                            log_no_borders([i,j]) = 0;
-                        end
-                    end
+                disp("Getting bordering plants.");  
+                all_x = arrayfun(@(t) t.x, obj.objects);
+                all_y = arrayfun(@(t) t.y, obj.objects);
+                
+                borders_idx = false(length(obj.objects), length(obj.objects));
+                no_border_idx = true(size(obj.objects));
+                
+                for p = 1:length(obj.objects)
+                    plant = obj.objects(p);
+                    [x_pts, y_pts] = circle_no_plot(plant.x, plant.y, 2*.7);
+                    
+                    [in,on] = inpolygon(all_x, all_y, x_pts, y_pts);
+                    in(p) = 0; % Don't count the plant itself in the polygon
+                    borders_idx(p,:) = in | on;
+                    no_border_idx = no_border_idx & ~(in | on);
                 end
-                no_borders = obj.objects(logical(log_no_borders));
-
+                no_borders = obj.objects(no_border_idx);
+                
+                borders_idx = triu(borders_idx, 1);
+                [a, b] = find(borders_idx == 1);
+                borders = transpose([obj.objects(a); obj.objects(b)]);
+                
                 resolved_bounds = [];
                 dead_plants = [];
+                
                 disp("Calculating competition");
                 for i = 1:size(borders, 1)
                     % If a plant is dead, don't check it, and add the other
