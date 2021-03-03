@@ -64,13 +64,13 @@ classdef Model < handle
                 disp("Getting bordering plants.");  
                 all_x = arrayfun(@(t) t.x, obj.objects);
                 all_y = arrayfun(@(t) t.y, obj.objects);
-                
+                plant_sz = arrayfun(@(t) t.plant.mature_rad, obj.objects);
                 borders_idx = false(length(obj.objects), length(obj.objects));
                 no_border_idx = true(size(obj.objects));
                 
                 for p = 1:length(obj.objects)
                     plant = obj.objects(p);
-                    [x_pts, y_pts] = circle_no_plot(plant.x, plant.y, 2*.7);
+                    [x_pts, y_pts] = circle_no_plot(plant.x, plant.y, 2*max(plant_sz));
                     
                     [in,on] = inpolygon(all_x, all_y, x_pts, y_pts);
                     in(p) = 0; % Don't count the plant itself in the polygon
@@ -78,67 +78,20 @@ classdef Model < handle
                     no_border_idx = no_border_idx & ~(in | on);
                 end
                 no_borders = obj.objects(no_border_idx);
-                
-                borders_idx = triu(borders_idx, 1);
-                [a, b] = find(borders_idx == 1);
-                borders = transpose([obj.objects(a); obj.objects(b)]);
-                
-                resolved_bounds = [];
-                dead_plants = [];
-                
+
                 disp("Calculating competition");
-                for i = 1:size(borders, 1)
-                    % If a plant is dead, don't check it, and add the other
-                    % plant to the resolved list if it isn't already?
-                    if (ismember(borders(i, 1), dead_plants) && ismember(borders(i, 2), dead_plants))
-                        continue
-                    elseif (ismember(borders(i, 1), dead_plants))
-                        if ~ismember(borders(i, 2), resolved_bounds)
-                            resolved_bounds = [resolved_bounds, borders(i, 2)];
-                        end
-                        continue
-                    elseif (ismember(borders(i, 2), dead_plants))
-                        if ~ismember(borders(i, 1), resolved_bounds)
-                            resolved_bounds = [resolved_bounds, borders(i, 1)];
-                        end
-                        continue
-                    end
-                    
-                    % If a plant has multiple bordering plants, remove it
-                    % from the resolved list, and have it compete with the
-                    % next plant.
-                    if (size(resolved_bounds, 2) ~= 0)
-                        resolved_bounds(resolved_bounds == borders(i, 1)) = [];
-                        resolved_bounds(resolved_bounds == borders(i, 2)) = [];
-                    end
-                    
-                    winner = competeRIIBasic(borders(i, 1), borders(i, 2));
-                    
-                    % Keep track of plants that lost (Useful for asserting
-                    % that the model is working correctly)
-                    if (winner == borders(i, 1))
-                        loser = borders(i, 2);
-                    else
-                        loser = borders(i, 1);
-                    end
-                    
-                    % Update lists
-                    dead_plants = [dead_plants, loser];
-                    resolved_bounds = [resolved_bounds, winner];
-                end
-                disp("Total: " + size(obj.objects,2) + ", Resolved: " + size(resolved_bounds,2) + ", Dead: " + size(dead_plants,2) + ", No Bordering: " + size(no_borders,2));
-                assert(size(obj.objects,2) == size(resolved_bounds,2) + size(dead_plants,2) + size(no_borders,2));
+                borders_idx = triu(borders_idx, 1);
+                [b_x, b_y] = find(borders_idx == 1);
+                resolved_bounds = competeRIIDiff(b_x, b_y, obj.objects);
+
+                
+                disp("Total: " + size(obj.objects,2) + ", Resolved: " + size(resolved_bounds,2) +  ", No Bordering: " + size(no_borders,2));
                 
                 % List of new objects
                 obj.objects = [resolved_bounds, no_borders];
                 
                 % Plot visual output
                 if (obj.plot_output)
-                    % borders_plot = reshape(borders, [1, size(borders, 1) * size(borders, 2)]);
-                    % obj.plotAndSave(no_borders, year, "no-borders")
-                    % obj.plotAndSave(borders_plot, year, "borders")
-                    % obj.plotAndSave(resolved_bounds, year, "resolved")
-                    % obj.plotAndSave(obj.objects, year, "all")
                     obj.plotAndSave(obj.objects, year, "resolved-all")
                 end
                 % Update all plants to next year

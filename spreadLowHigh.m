@@ -7,7 +7,7 @@ function plantObjs = spreadLowHigh(center_x, center_y, species, seeds_low, seeds
 
 if spread_distribution == "Beta"
     distr = makedist("Beta", 2, 2);
-    r = random(distr, seeds_low, 1) * (spread_high - spread_low) + spread_low;
+    r = random(distr, seeds_low, 1) * (spread_high - spread_low) + species.mature_rad;
 else
     distr = makedist("Uniform", spread_low + species.mature_rad, spread_high + species.mature_rad);
     r = random(distr, seeds_low, 1);
