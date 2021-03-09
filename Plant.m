@@ -15,7 +15,7 @@ classdef Plant
     end
     
     methods
-        function p = Plant(name, spread_fun, mature_rad, col, rii_table_idx)
+        function p = Plant(name, spread_fun, mature_rad, mature_age, col, rii_table_idx)
             %PLANT Construct an instance of this class
             %   name: String. Name of the species
             %   spreadFun: Function. Spread function for reproduction step
@@ -25,7 +25,7 @@ classdef Plant
             p.name = name;
             p.spread_fun = spread_fun;
             p.mature_rad = mature_rad;
-            p.mature_age = 2;
+            p.mature_age = mature_age;
             p.rii_table_idx = rii_table_idx;
             p.col = col;
         end

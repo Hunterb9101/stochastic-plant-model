@@ -4,43 +4,40 @@ classdef Model < handle
     properties
         dims = [100, 100] % Model dimensions (In meters) 
         years = 1; % Number of years to run the model
-        riiTable = [
-            +0.000, -0.250, -0.500;
-            +0.250, +0.000, -0.750; 
-            +0.500, +0.750, +0.000
-            ];
+        rii_table = []
+        plant_list = [] % A list of the different species in the model
+        plant_init = [] % The number of each plant to add (in same order as plant_list)
         objects = [] % The model's objects
         ts_now % A timestamp for plotting output
-        plot_output = 1 % Set to 1 to get plot output
+        output = 1 % Set to 1 to get model output
+        border_margin = 10
+        out_plant_num = [] % A list of plant counts by year
     end
     
     methods
-        function obj = Model(dims, years, riiTable)
+        function obj = Model(dims, years, rii_table, plant_list, plant_init)
             %MODEL Construct an instance of this class
             obj.dims = dims;
             obj.years = years;
-            obj.riiTable = riiTable;
+            obj.rii_table = rii_table;
+            obj.plant_list = plant_list;
+            obj.plant_init = plant_init;
             obj.ts_now = now;
+            obj.out_plant_num = zeros(years, length(plant_list));
+            disp(size(obj.out_plant_num));
         end
         
         function init(obj)
             %INIT Initializes objects/plants for model
-            spread = @(x,y,species) spreadBasic(x, y, species, 2, 50);
-            plant_list = [
-                Plant("InvasivePlant", spread, .75, "r", 1), ...
-                Plant("NativePlant", spread, 1, "b", 2), ...
-                Plant("NativePlant2", spread, 3, "g", 3)
-            ];
-            plant_list(1).riiTable.data = obj.riiTable; 
-            init_plant_num = [10, 50, 25]; % Initial number of plants to spawn
+            obj.plant_list(1).riiTable.data = obj.rii_table; 
 
             % Initialize plants
-            for plant_idx = 1:size(plant_list, 2)
-                r = rand(2, init_plant_num(plant_idx));
+            for plant_idx = 1:size(obj.plant_list, 2)
+                r = rand(2, obj.plant_init(plant_idx));
                 r(1,:) = obj.dims(1) * r(1,:);
                 r(2,:) = obj.dims(2) * r(2,:);
                 for coord = r
-                    obj.objects = [obj.objects, PlantObj(coord(1), coord(2), plant_list(plant_idx))];
+                    obj.objects = [obj.objects, PlantObj(coord(1), coord(2), obj.plant_list(plant_idx))];
                 end
             end
         end
@@ -56,79 +53,66 @@ classdef Model < handle
                 % Reproduce
                 new_plants = [];
                 for i = obj.objects
-                    new_plants = [new_plants, i.reproduce()];
+                    temp = i.reproduce();
+                    for t = temp
+                        if (t.x > 0 && t.x < obj.dims(1) && t.y > 0 && ...
+                            t.y < obj.dims(2))
+                            new_plants = [new_plants, t];
+                        end
+                    end
                 end
-                disp("New Plants: " + size(new_plants, 2));
+                disp("New Plants: " + size(new_plants, 2) + ", Existing Plants: " + length(obj.objects));
                 obj.objects = [obj.objects, new_plants];
 
-                % Remove Overlaps
-                log_no_borders = ones(size(obj.objects));
-                borders = [];
-                for i = 1:size(obj.objects, 2)
-                    for j = 1:i-1
-                        if(obj.objects(i).isBordering(obj.objects(j)))
-                            borders = [borders; [obj.objects(i), obj.objects(j)]];
-                            log_no_borders([i,j]) = 0;
-                        end
-                    end
+                disp("Getting bordering plants.");  
+                all_x = arrayfun(@(t) t.x, obj.objects);
+                all_y = arrayfun(@(t) t.y, obj.objects);
+                plant_sz = arrayfun(@(t) t.plant.mature_rad, obj.objects);
+                borders_idx = false(length(obj.objects), length(obj.objects));
+                no_border_idx = true(size(obj.objects));
+                
+                for p = 1:length(obj.objects)
+                    plant = obj.objects(p);
+                    [x_pts, y_pts] = circle_no_plot(plant.x, plant.y, 2*max(plant_sz));
+                    
+                    [in,on] = inpolygon(all_x, all_y, x_pts, y_pts);
+                    in(p) = 0; % Don't count the plant itself in the polygon
+                    borders_idx(p,:) = in | on;
+                    no_border_idx = no_border_idx & ~(in | on);
                 end
-                no_borders = obj.objects(logical(log_no_borders));
+                no_borders = obj.objects(no_border_idx);
 
-                resolved_bounds = [];
-                dead_plants = [];
-                for i = 1:size(borders, 1)
-                    % If a plant is dead, don't check it, and add the other
-                    % plant to the resolved list if it isn't already?
-                    if (ismember(borders(i, 1), dead_plants) && ismember(borders(i, 2), dead_plants))
-                        continue
-                    elseif (ismember(borders(i, 1), dead_plants))
-                        if ~ismember(borders(i, 2), resolved_bounds)
-                            resolved_bounds = [resolved_bounds, borders(i, 2)];
+                disp("Calculating competition");
+                borders_idx = triu(borders_idx, 1);
+                [b_x, b_y] = find(borders_idx == 1);
+                
+                for i=1:size(b_x)
+                    if ~obj.objects(b_x(i)).isBordering(obj.objects(b_y(i)))
+                        borders_idx(b_x(i), b_y(i)) = 0;
+                        if sum(borders_idx(:, b_x(i))) == 0 && sum(borders_idx(b_x(i), :)) == 0
+                            no_borders = [no_borders, obj.objects(b_x(i))];
+                        elseif sum(borders_idx(:, b_y(i))) == 0 && sum(borders_idx(b_y(i), :)) == 0
+                            no_borders = [no_borders, obj.objects(b_y(i))];
                         end
-                        continue
-                    elseif (ismember(borders(i, 2), dead_plants))
-                        if ~ismember(borders(i, 1), resolved_bounds)
-                            resolved_bounds = [resolved_bounds, borders(i, 1)];
-                        end
-                        continue
                     end
-                    
-                    % If a plant has multiple bordering plants, remove it
-                    % from the resolved list, and have it compete with the
-                    % next plant.
-                    if (size(resolved_bounds, 2) ~= 0)
-                        resolved_bounds(resolved_bounds == borders(i, 1)) = [];
-                        resolved_bounds(resolved_bounds == borders(i, 2)) = [];
-                    end
-                    
-                    winner = competeRIIBasic(borders(i, 1), borders(i, 2));
-                    
-                    % Keep track of plants that lost (Useful for asserting
-                    % that the model is working correctly)
-                    if (winner == borders(i, 1))
-                        loser = borders(i, 2);
-                    else
-                        loser = borders(i, 1);
-                    end
-                    
-                    % Update lists
-                    dead_plants = [dead_plants, loser];
-                    resolved_bounds = [resolved_bounds, winner];
                 end
-                disp("Total: " + size(obj.objects,2) + ", Resolved: " + size(resolved_bounds,2) + ", Dead: " + size(dead_plants,2) + ", No Bordering: " + size(no_borders,2));
-                assert(size(obj.objects,2) == size(resolved_bounds,2) + size(dead_plants,2) + size(no_borders,2));
+                [b_x, b_y] = find(borders_idx == 1);
+                resolved_bounds = competeRIIDiff(b_x, b_y, obj.objects);
+
+                
+                disp("Total: " + size(obj.objects,2) + ", Resolved: " + size(resolved_bounds,2) +  ", No Bordering: " + size(no_borders,2));
                 
                 % List of new objects
                 obj.objects = [resolved_bounds, no_borders];
+                yr_plant_num = zeros(length(obj.plant_list),1);
+                for i=1:length(yr_plant_num)
+                    yr_plant_num(i) = sum(arrayfun(@(x) x.plant.name == obj.plant_list(i).name, obj.objects));
+                end
                 
-                % Plot visual output
-                if (obj.plot_output)
-                    % borders_plot = reshape(borders, [1, size(borders, 1) * size(borders, 2)]);
-                    % obj.plotAndSave(no_borders, year, "no-borders")
-                    % obj.plotAndSave(borders_plot, year, "borders")
-                    % obj.plotAndSave(resolved_bounds, year, "resolved")
-                    % obj.plotAndSave(obj.objects, year, "all")
-                    obj.plotAndSave(obj.objects, year, "resolved-all")
+                obj.out_plant_num(year,:) = yr_plant_num;
+                
+                if (obj.output)
+                    obj.modelOutput(obj.objects, year);
                 end
                 % Update all plants to next year
                 arrayfun(@(x) x.nextYear(), obj.objects); 
@@ -136,24 +120,36 @@ classdef Model < handle
             out = obj.objects;
         end
 
-        function plotAndSave(obj, objects, year, timestamped_filename)
+        function modelOutput(obj, objects, year)
+            pltname = sprintf("yr%03d-%s.png", year, "out");
+            filepath = sprintf("./reports/model-%s/", datestr(obj.ts_now, 'yyyymmddHHMM'));
+            if (~isfolder(filepath))
+                mkdir(filepath)
+            end
+            
+            plt = plotGrid(obj, objects);
+            saveas(plt, filepath+pltname);
+            tbl = table(transpose(1:obj.years), obj.out_plant_num);
+            tbl.Properties.VariableNames = {'year' 'plant_counts'};
+            
+            writetable(tbl, filepath+"out.csv", "Delimiter", ",", "QuoteStrings", true);
+        end
+        
+        function plt=plotGrid(obj, objects)
             %PLOTANDSAVE Plots and saves objects.
             clf;
-            xlim([0, obj.dims(1)]);
-            ylim([0, obj.dims(2)]);
+            xlim([0 - obj.border_margin, obj.dims(1) + obj.border_margin]);
+            ylim([0 - obj.border_margin, obj.dims(2) + obj.border_margin]);
+            yline(0, '--');
+            xline(0, '--');
+            yline(obj.dims(2), '--');
+            xline(obj.dims(1), '--');
             daspect([1 1 1]);
             for i = objects
                 i.plot();
             end
-
-            % Saves each year in the reports subdirectory.
-            fmt_filename = ["./reports/model-%s/", "yr%03d-%s.png"];
-            filename = sprintf(fmt_filename(2), year, timestamped_filename);
-            filepath = sprintf(fmt_filename(1), datestr(obj.ts_now, 'yyyymmddHHMM'));
-            if (~isfolder(filepath))
-                mkdir(filepath)
-            end
-            saveas(gcf, filepath+filename);
+            plt=gcf;
+            
         end
     end
 end
