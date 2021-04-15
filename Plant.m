@@ -6,6 +6,7 @@ classdef Plant
         spread_fun  % Function: Spread function for reproduction step
         mature_rad  % Float: Mature radius of a plant
         mature_age  % Int: Age that a plant survives to
+        reproduction_steps % Int: The number of reproductions in a year
         rii_table_idx % Int: Index of plant in the RII table
         col % Color: Color of the plant
     end
@@ -15,7 +16,7 @@ classdef Plant
     end
     
     methods
-        function p = Plant(name, spread_fun, mature_rad, mature_age, col, rii_table_idx)
+        function p = Plant(name, spread_fun, mature_rad, mature_age, reproduction_steps, col, rii_table_idx)
             %PLANT Construct an instance of this class
             %   name: String. Name of the species
             %   spreadFun: Function. Spread function for reproduction step
@@ -27,6 +28,7 @@ classdef Plant
             p.mature_rad = mature_rad;
             p.mature_age = mature_age;
             p.rii_table_idx = rii_table_idx;
+            p.reproduction_steps = reproduction_steps;
             p.col = col;
         end
     end
