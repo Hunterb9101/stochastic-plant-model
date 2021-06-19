@@ -69,6 +69,7 @@ classdef Model < handle
                     end
                     % disp("New Plants: " + size(new_plants, 2) + ", Existing Plants: " + length(obj.objects));
                     obj.objects = [obj.objects, new_plants];
+                    obj.objects = obj.objects(randperm(length(obj.objects)));
 
                     % disp("Getting bordering plants.");  
                     all_x = arrayfun(@(t) t.x, obj.objects);
