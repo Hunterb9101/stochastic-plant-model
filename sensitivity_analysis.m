@@ -1,14 +1,15 @@
 clear;
 clc;
 
-outfile = sprintf("reports/sensitivity-analysis-%s.csv", datestr(now, 'yyyymmddHHMM'));
+dt_now = datestr(now, 'yyyymmddHHMM');
+outfile = sprintf("reports/sensitivity-analysis-%s.csv", dt_now);
 model_dims = [50, 50];  % 50 meters^2
-years = 10; % Number of years to run the model
+years = 15; % Number of years to run the model
 
 
 % Grid Approach
 rii_diff = 0:0.25:2; % RII Competitive Index. Should be between -1 and 1
-seed_diff = 0:25:100;
+seed_diff = 0:25:75;
 spread_diff = 0:.5:3;
 rep_cyc = [1, 2];
 % [rd, sd, spd, rc] = ndgrid(rii_diff, seed_diff, spread_diff, rep_cyc);
@@ -19,8 +20,6 @@ def_rii = 0;
 def_seed = 0;
 def_spread = 0;
 def_rep = 1;
-
-dt_now = datestr(now, 'yyyymmddHHMM');
 
 rd = [rii_diff, ...
     zeros(1, size(seed_diff,2)) + def_rii, ...
@@ -48,7 +47,7 @@ param = transpose([rd; sd; spd; rc]);
 writematrix(paramHeaders, outfile);
 writematrix(param, outfile, 'WriteMode', 'append');
         
-for i = 21:szX
+for i = 12:12 %14:szX
     disp([int2str(i),' of ', int2str(szX)])
     rii_table = [
         0, param(i, 1)/2;
